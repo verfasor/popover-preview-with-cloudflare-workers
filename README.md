@@ -14,10 +14,15 @@ The popover preview system has two parts:
 ### Step 1: Create a Cloudflare Worker
 
 1. Sign up for Cloudflare (if you don't have an account) at [cloudflare.com](https://cloudflare.com)
-2. Go to Workers & Pages in your Cloudflare dashboard
-3. Click "Create a Worker"
+2. Go to **Workers & Pages** in your Cloudflare dashboard
+3. Click **"Create a Worker"**
 4. Delete the default code and paste the worker code from [`worker.js`](https://github.com/verfasor/popover-preview-with-cloudflare-workers/blob/main/worker.js)
-5. Click "Save and Deploy"
+   - Inside the code, you’ll see:
+     ```javascript
+     const allowedOrigin = "https://yourdomain.com"; 
+     ```
+   - Update `https://yourdomain.com` to your own domain.
+5. Click **"Save and Deploy"**
 6. Copy your worker URL (it will look like `https://your-worker.your-subdomain.workers.dev`)
 
 ### Step 2: Add the Frontend Script + HTML snippet
