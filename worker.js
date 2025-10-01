@@ -3,12 +3,20 @@ export default {
     const { searchParams } = new URL(request.url);
     const targetUrl = searchParams.get("url");
 
-    // CORS headers
+    const origin = request.headers.get("Origin");
+    const allowedOrigin = "https://yourdomain.com";
+    // Only requests coming from this exact origin (via the Origin header) 
+    // will be given CORS access. This ensures that browsers running code 
+    // on other domains cannot use this endpoint, even though they can 
+    // technically make the request. Without this restriction, using "*" 
+    // would allow any site to call the API, which is a security risk.
+
+    // Build CORS headers only if Origin matches
     const corsHeaders = {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      ...(origin === allowedOrigin ? { "Access-Control-Allow-Origin": allowedOrigin } : {}),
     };
 
     // Handle preflight OPTIONS requests
@@ -36,9 +44,8 @@ export default {
 
     let html;
     try {
-      // Fetch with browser-like headers and timeout
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000); // 10s
+      const timeout = setTimeout(() => controller.abort(), 10000);
       const resp = await fetch(url.toString(), {
         redirect: "follow",
         signal: controller.signal,
@@ -46,7 +53,8 @@ export default {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept":
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
           "Accept-Language": "en-US,en;q=0.9",
           "Connection": "keep-alive",
         },
@@ -80,12 +88,10 @@ export default {
       getMeta(/<meta[^>]+name=["']twitter:image["'][^>]+content=["'](.*?)["']/i) ||
       getMeta(/<meta[^>]+name=["']thumbnail["'][^>]+content=["'](.*?)["']/i);
 
-    // Fix relative image URLs
     if (ogImage && !/^https?:\/\//i.test(ogImage)) {
       ogImage = `${url.protocol}//${url.host}${ogImage}`;
     }
 
-    // Fallbacks if metadata missing
     if (!title) {
       const h1 = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
       title = h1 ? h1[1].replace(/<[^>]+>/g, "") : null;
