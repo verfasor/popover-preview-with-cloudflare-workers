@@ -1,0 +1,71 @@
+<script>
+async function showPreview(e) {
+  const url = e.target.href;
+  const previewBox = document.getElementById("preview-box");
+
+  try {
+    const res = await fetch(
+      "https://your-worker.your-subdomain.workers.dev/?url=" + encodeURIComponent(url)
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+
+    previewBox.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <strong>${data.title || ""}</strong>
+        <em>${data.description || ""}</em>
+        ${data.ogImage ? `<img src="${data.ogImage}" style="width:100%; height:auto;">` : ""}
+      </div>
+    `;
+    previewBox.style.display = "block";
+
+    const boxWidth = previewBox.offsetWidth;
+    const boxHeight = previewBox.offsetHeight;
+    const pageWidth = window.innerWidth;
+    const pageHeight = window.innerHeight;
+
+    // Determine horizontal position 
+    let left = e.pageX + 10; 
+    if (left + boxWidth > pageWidth) {
+      left = e.pageX - boxWidth - 10; 
+      if (left < 0) left = 10; 
+    }
+
+    // Determine vertical position
+    let top = e.pageY + 10;
+    if (top + boxHeight > pageHeight) {
+      top = pageHeight - boxHeight - 10; 
+      if (top < 0) top = 10; 
+    }
+
+    previewBox.style.left = left + "px";
+    previewBox.style.top = top + "px";
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function hidePreview() {
+  document.getElementById("preview-box").style.display = "none";
+}
+
+// Only select links inside specific container(s)
+const containerSelector = "main"; // main works better for bearblog.dev users
+document.querySelectorAll(`${containerSelector} a`).forEach(link => {
+  link.addEventListener("mouseover", showPreview);
+  link.addEventListener("mouseout", hidePreview);
+});
+</script>
+
+<div id="preview-box" style="
+  position:absolute;
+  display:none;
+  padding:8px;
+  background:#fff;
+  border:1px solid #ccc;
+  z-index:999;
+  width:300px;        
+  box-sizing:border-box;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+"></div>
