@@ -5,12 +5,8 @@ export default {
 
     const origin = request.headers.get("Origin");
     const allowedOrigin = "https://yourdomain.com";
-    // Only requests coming from this exact origin (via the Origin header) 
-    // will be given CORS access. This ensures that browsers running code 
-    // on other domains cannot use this endpoint, even though they can 
-    // technically make the request. Without this restriction, using "*" 
-    // would allow any site to call the API, which is a security risk.
-
+    // Good enough to prevent casual hotlinking.
+    
     // Build CORS headers only if Origin matches
     const corsHeaders = {
       "Content-Type": "application/json",
